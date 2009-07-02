@@ -10,7 +10,7 @@ Version 0.01
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 use 5.008001;
 
@@ -34,8 +34,8 @@ Very simple role for Catalyst::Log that enables debug output to go to OS X's
 'say' command via $c->log->speak();
 
 At the moment, as computers are fast - multiple speaks will pile up.  I will fix
-this soon, so they queue.  May also work with tonal debugging in the future. May
-also add a cross-platform speech command, or employ a speech web service.
+this soon, so they queue.  May also work with tonal debugging in the future. Now
+uses say on darwin/OS X, and espeak on Linux.
 
 This module shows the potential and handiness of roles for Catalyst.
 
@@ -47,7 +47,8 @@ use Moose::Role;
 
 =head2 speak
 
-Given text as an argument, send it to OS X's say(1) command.
+Given text as an argument, send it to OS X's say(1), or Linux's espeak
+command.
 
 =cut
 
@@ -57,7 +58,17 @@ sub speak
     
     return unless $txt;
     
-    system("say $txt &") if $ENV{'SPEAK'};
+    if($ENV{'SPEAK'})
+    {
+        if($^O eq 'darwin')
+        {
+            system("say $txt &");
+        }
+        elsif($^O eq 'linux')
+        {
+            system("espeak $txt &");
+        }
+    }
 }
 
 =head1 SEE ALSO
